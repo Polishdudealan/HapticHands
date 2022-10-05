@@ -5,6 +5,7 @@
  *      Author: atondryk
  */
 #include <stdint.h>
+#include "main.h"
 
 #ifndef INC_SERVO_H_
 #define INC_SERVO_H_
@@ -13,7 +14,7 @@
 void servoInit(uint8_t finger, uint8_t pin);
 
 // Sets position of the servo
-// Takes in degrees
+// Takes in degrees 0-180
 void servoSetPos(uint8_t finger, uint8_t deg);
 
 // Sets a start/zero position of the servo

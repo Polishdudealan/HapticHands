@@ -20,4 +20,7 @@ uint16_t potRead(uint8_t finger){
 // Callback for when conversion finishes
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc1){
 	buf = adc_buffer;
+
+	// This leads to hard fault... why
+	//HAL_ADC_Start_DMA(&hadc1, &adc_buffer, 1);
 }

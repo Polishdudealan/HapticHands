@@ -1,0 +1,4 @@
+../Core/Src/servo.c:12:6:servoInit	16	static
+../Core/Src/servo.c:18:6:servoSetPos	16	static
+../Core/Src/servo.c:29:6:servoSetStart	16	static
+../Core/Src/servo.c:35:6:servoReset	16	static
