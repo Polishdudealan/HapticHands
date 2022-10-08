@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "potentiometer.h"
 #include "servo.h"
+#include "comms.h"
 
 /* USER CODE END Includes */
 
@@ -48,9 +49,16 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart6;
+DMA_HandleTypeDef hdma_usart6_rx;
 
 /* USER CODE BEGIN PV */
 uint32_t adc_buffer[10];
+FingerState finger_state = (FingerState){.valid=0,
+										  .angle0=0, .coll0=0,
+										  .angle1=0, .coll1=0,
+										  .angle2=0, .coll2=0,
+										  .angle3=0, .coll3=0,
+										  .angle4=0, .coll4=0};
 
 /* USER CODE END PV */
 
@@ -119,26 +127,32 @@ int main(void)
   // Timer 3 starts DMA conversion once per millisecond
   HAL_ADC_Start_DMA(&hadc1, &adc_buffer, 1);
 
+  // Starts UART receive interrupts
+  UART_INIT();
 
-//  TIM2->CCR1 = 2000;
-//  uint16_t test = (2.0*(90 / 0.045) + 2000);
-  uint16_t pot_reading;
+  // Variable initialization
+  volatile uint16_t pot_reading;
   uint8_t ang_deg = 0;
   servoSetPos(0, 0);
+  uint16_t f1_ang;
 
-  // Function to test servo and potentiometer
+  // Function to test servo and potenstiometer
   // Reads pot value, sends it via uart, moves servo accordingly
   void servo_follow(){
 	pot_reading = potRead(0);
 
 	// Send SOP, msb, lsb
-	uint8_t sendData[4] = {'$', (pot_reading >> 8) & 0xFF, pot_reading & 0xFF};
+//	uint8_t sendData[4] = {'$', (pot_reading >> 8) & 0x0F, pot_reading & 0xFF};
 
-	HAL_UART_Transmit(&huart6, &sendData, sizeof(sendData), 200);
+//	HAL_UART_Transmit(&huart6, &sendData, sizeof(sendData), 200);
 
-	ang_deg = (pot_reading * (180.0 / 4095));
-	servoSetPos(0, ang_deg);
+	sendCommand('1', pot_reading, pot_reading, pot_reading, pot_reading, pot_reading);
+
+//	ang_deg = (pot_reading * (180.0 / 4095));
+//	servoSetPos(0, ang_deg);
+	HAL_Delay(10);
   }
+//
 
 
   /* USER CODE END 2 */
@@ -148,6 +162,34 @@ int main(void)
   while (1)
   {
 	 servo_follow();
+
+	 // Check finger states. FingerState struct should be getting auto-updated
+//	 updateFingerState();
+	 char coll0 = finger_state.coll0;
+	 char coll1 = finger_state.coll1;
+	 char coll2 = finger_state.coll2;
+	 char coll3 = finger_state.coll3;
+	 char coll4 = finger_state.coll4;
+	 // Checks for collision with index finger
+	 if(coll1 == '1'){
+		 // collision
+		 //uint16_t col = 0;
+		 pot_reading = potRead(0);
+		 ang_deg = (pot_reading * (180.0 / 4095));
+		 f1_ang = finger_state.angle1;
+		 uint8_t f1_ang_deg = (f1_ang * (180.0 / 4095));
+		 servoSetPos(0, f1_ang_deg);
+
+
+		 clearFingerState();
+	 }
+
+	 // reset servo if pot moves backwards
+	 if(potRead(0) < f1_ang){
+		 servoSetPos(0, 0);
+	 }
+
+
 
 
     /* USER CODE END WHILE */
@@ -400,6 +442,9 @@ static void MX_DMA_Init(void)
   /* DMA2_Stream0_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+  /* DMA2_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
 
 }
 

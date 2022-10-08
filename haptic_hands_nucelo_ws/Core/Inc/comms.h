@@ -5,32 +5,54 @@
  *      Author: atondryk
  */
 #include <stdint.h>
+#include "main.h"
 
-#define UART_BUFFER_SIZE 20
+#define UART_BUFFER_SIZE 17
 
 #ifndef INC_COMMS_H_
 #define INC_COMMS_H_
 // comms will be over UART
 
-// message structure sent to unity
-struct PotMsg{
-	uint16_t angle[5];
-};
+// finger states
+typedef struct {
+	uint8_t valid;
+	// Angle (pot counts)
+	uint16_t angle0;
+	// Collision 1 = yes, 0 = no
+	uint8_t coll0;
 
-// message structures received from unity
-struct VibrationMsg{
-	uint8_t finger[5];
-};
+	uint16_t angle1;
+	uint8_t coll1;
 
-// UART buffer. Data will be received via interrupts
-uint8_t received_data[UART_BUFFER_SIZE];
+	uint16_t angle2;
+	uint8_t coll2;
+
+	uint16_t angle3;
+	uint8_t coll3;
+
+	uint16_t angle4;
+	uint8_t coll4;
+} FingerState;
+
+extern FingerState finger_state;
+
+
+// Enum for tags
+extern enum CMD_TYPES{
+	  POTENTIOMETER = '1'
+}CMD_TYPE;
+
+// uint8 to uint16 helper function
+uint16_t uint8_to_uint16(uint8_t msb, uint8_t lsb);
+
 
 // UART callback. Moves data from uart buffer into received_data buffer
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 
 // Sets command in format
-// '$,DATA,CHECKSUM'
+// Sends ‘$,1,a1,a2,b1,b2,c1,c2,d1,d2,e1,e2’
+// Each a1, a2 represents 2 bytes = potentiometer value in degrees
 // Used for sending finger angle data to unity
-void sendCommand(uint8_t* cmd);
+void sendCommand(uint8_t cmd_type, uint16_t f1, uint16_t f2, uint16_t f3, uint16_t f4, uint16_t f5);
 
 #endif /* INC_COMMS_H_ */
