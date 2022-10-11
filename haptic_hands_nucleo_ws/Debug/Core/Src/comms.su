@@ -1,6 +1,0 @@
-../Core/Src/comms.c:18:6:HAL_UART_RxCpltCallback	16	static
-../Core/Src/comms.c:26:6:UART_INIT	8	static
-../Core/Src/comms.c:35:10:uint8_to_uint16	24	static
-../Core/Src/comms.c:41:6:clearFingerState	4	static
-../Core/Src/comms.c:61:6:updateFingerState	16	static
-../Core/Src/comms.c:103:6:sendCommand	40	static
