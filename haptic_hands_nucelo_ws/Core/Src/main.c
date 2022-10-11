@@ -76,18 +76,32 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+//#define DEBUG
+#ifdef DEBUG
+void HAL_Delay(uint32_t Delay){
+	for(volatile int i = 0; i < Delay * 1000; ++i);
+}
+#endif
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
 	if(GPIO_PIN != GPIO_PIN_13) return;
-	//HAL_Delay(500);
-	servoSetPos(0, 0);
-	//HAL_Delay(3000);
+	//Map & calibrate potentiometers with servos on PC
+	HAL_Delay(500);
+	for(int i = 0; i<5; ++i){
+		servoSetPos(0, 0); //Update per finger
+	}
+	HAL_Delay(1500);
 	uint16_t pot_readings[5];
 	for(int i = 0; i<5; ++i){
 		pot_readings[i] = potRead(0); //Update per finger
 	}
 	sendCommand(CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
-	//HAL_Delay(10);
-	servoSetPos(0, 180);			//Will this break someone's fingers?
+	HAL_Delay(1500);
+	for(int i = 0; i<5; ++i){
+		servoSetPos(0, 180); //Update per finger
+	}			//Will 180 break someone's fingers?
+	HAL_Delay(10); //Let DMA update
 	for(int i = 0; i<5; ++i){
 		pot_readings[i] = potRead(0); //Update per finger
 	}
