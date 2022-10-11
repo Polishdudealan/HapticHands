@@ -87,23 +87,24 @@ void HAL_Delay(uint32_t Delay){
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
 	if(GPIO_PIN != GPIO_PIN_13) return;
 	//Map & calibrate potentiometers with servos on PC
+  unsigned int num_fingers = 1; //Update as we add more
 	HAL_Delay(500);
 	for(int i = 0; i<5; ++i){
-		servoSetPos(0, 0); //Update per finger
+		servoSetPos(i % num_fingers, 0); //Update per finger
 	}
 	HAL_Delay(1500);
 	uint16_t pot_readings[5];
 	for(int i = 0; i<5; ++i){
-		pot_readings[i] = potRead(0); //Update per finger
+		pot_readings[i] = potRead(i % num_fingers); //Update per finger
 	}
 	sendCommand(CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 	HAL_Delay(1500);
 	for(int i = 0; i<5; ++i){
-		servoSetPos(0, 180); //Update per finger
+		servoSetPos(i % num_fingers, 180); //Update per finger
 	}			//Will 180 break someone's fingers?
 	HAL_Delay(10); //Let DMA update
 	for(int i = 0; i<5; ++i){
-		pot_readings[i] = potRead(0); //Update per finger
+		pot_readings[i] = potRead(i % num_fingers); //Update per finger
 	}
 	sendCommand(CALIBRATEMAX, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 }
