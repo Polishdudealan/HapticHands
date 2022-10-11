@@ -39,7 +39,9 @@ extern FingerState finger_state;
 
 // Enum for tags
 extern enum CMD_TYPES{
-	  POTENTIOMETER = '1'
+	  CALIBRATEZERO = '0',
+	  POTENTIOMETER = '1',
+	  CALIBRATEMAX  = 'M'
 }CMD_TYPE;
 
 // uint8 to uint16 helper function

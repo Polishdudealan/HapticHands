@@ -60,8 +60,8 @@ all: main-build
 main-build: haptic_hands_nucelo_ws.elf secondary-outputs
 
 # Tool invocations
-haptic_hands_nucelo_ws.elf haptic_hands_nucelo_ws.map: $(OBJS) $(USER_OBJS) D:\EECS473_Project\haptic_hands_nucelo_ws\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "haptic_hands_nucelo_ws.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\EECS473_Project\haptic_hands_nucelo_ws\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="haptic_hands_nucelo_ws.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+haptic_hands_nucelo_ws.elf haptic_hands_nucelo_ws.map: $(OBJS) $(USER_OBJS) C:\Users\m\Code\eecs473\HapticHands\haptic_hands_nucelo_ws\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "haptic_hands_nucelo_ws.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\m\Code\eecs473\HapticHands\haptic_hands_nucelo_ws\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="haptic_hands_nucelo_ws.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

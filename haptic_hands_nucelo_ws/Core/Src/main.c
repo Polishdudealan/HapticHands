@@ -76,7 +76,23 @@ static void MX_TIM3_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
+	if(GPIO_PIN != GPIO_PIN_13) return;
+	//HAL_Delay(500);
+	servoSetPos(0, 0);
+	//HAL_Delay(3000);
+	uint16_t pot_readings[5];
+	for(int i = 0; i<5; ++i){
+		pot_readings[i] = potRead(0); //Update per finger
+	}
+	sendCommand(CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+	//HAL_Delay(10);
+	servoSetPos(0, 180);			//Will this break someone's fingers?
+	for(int i = 0; i<5; ++i){
+		pot_readings[i] = potRead(0); //Update per finger
+	}
+	sendCommand(CALIBRATEMAX, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+}
 /* USER CODE END 0 */
 
 /**
@@ -136,7 +152,7 @@ int main(void)
   servoSetPos(0, 0);
   uint16_t f1_ang;
 
-  // Function to test servo and potenstiometer
+  // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
   void servo_follow(){
 	pot_reading = potRead(0);
@@ -455,10 +471,32 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 
