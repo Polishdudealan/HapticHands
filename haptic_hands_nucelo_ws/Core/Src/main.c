@@ -59,6 +59,7 @@ FingerState finger_state = (FingerState){.valid=0,
 										  .angle2=0, .coll2=0,
 										  .angle3=0, .coll3=0,
 										  .angle4=0, .coll4=0};
+uint8_t calibrate_status;
 
 /* USER CODE END PV */
 
@@ -85,28 +86,47 @@ void HAL_Delay(uint32_t Delay){
 #endif
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
+
 	if(GPIO_PIN != GPIO_PIN_13) return;
 	//Map & calibrate potentiometers with servos on PC
-  unsigned int num_fingers = 1; //Update as we add more
-	HAL_Delay(500);
-	for(int i = 0; i<5; ++i){
-		servoSetPos(i % num_fingers, 0); //Update per finger
-	}
-	HAL_Delay(1500);
+	unsigned int num_fingers = 1; //Update as we add more
+	HAL_Delay(10);
 	uint16_t pot_readings[5];
 	for(int i = 0; i<5; ++i){
 		pot_readings[i] = potRead(i % num_fingers); //Update per finger
 	}
-	sendCommand(CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
-	HAL_Delay(1500);
+	if (calibrate_status == 0) {
+		HAL_Delay(10);
+		for(int i = 0; i<5; ++i){
+			servoSetPos(i % num_fingers, 0); //Update per finger
+		}
+		sendCommand(CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+		calibrate_status = 1;
+	}
+	else if (calibrate_status == 1) {
+		HAL_Delay(10);
+		for(int i = 0; i<5; ++i){
+			servoSetPos(i % num_fingers, 180); //Update per finger
+		}			//Will 180 break someone's fingers?
+		sendCommand(CALIBRATEMAX, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+		calibrate_status = 0;
+	}
+	else {
+		calibrate_status = 0;
+	}
+
+	/*
+	uint16_t tmp_readings[5];
+	HAL_Delay(2000);
 	for(int i = 0; i<5; ++i){
 		servoSetPos(i % num_fingers, 180); //Update per finger
 	}			//Will 180 break someone's fingers?
 	HAL_Delay(10); //Let DMA update
 	for(int i = 0; i<5; ++i){
-		pot_readings[i] = potRead(i % num_fingers); //Update per finger
+		tmp_readings[i] = potRead(i % num_fingers); //Update per finger
 	}
-	sendCommand(CALIBRATEMAX, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+	*/
+
 }
 /* USER CODE END 0 */
 
@@ -181,7 +201,7 @@ int main(void)
 
 //	ang_deg = (pot_reading * (180.0 / 4095));
 //	servoSetPos(0, ang_deg);
-	HAL_Delay(10);
+	HAL_Delay(50);
   }
 //
 
