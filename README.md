@@ -13,3 +13,9 @@ Our servos take between 0.5-2.5ms to move 0-180 degrees.
 The potentiometer value is access through an ADC port on the nucleo. DMA conversions are maintained by Timer 3 at a frequency of 1kHz.
 The value is transferred to the program during the callback. Then is is sampled by user programs.
 
+### Recalibration Button (Currently Blue Button on Nucleo)
+DO NOT PRESS WHILE GLOVE IS ON.
+This will bring the servo to angle 0 and send command '0' to the PC to map servo angle 0 to potentiometer values.
+Then it will bring the servo to angle 180 and send command 'M' to the PC to map servo angle 180 to potentiometer values.
+It is the job of the PC to do the rest of the math there (might change in future).
+It is unknown if angle 180 would bend a user's fingers too far. It might be better to use a different value

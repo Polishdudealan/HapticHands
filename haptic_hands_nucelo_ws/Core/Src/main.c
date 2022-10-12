@@ -59,6 +59,7 @@ FingerState finger_state = (FingerState){.valid=0,
 										  .angle2=0, .coll2=0,
 										  .angle3=0, .coll3=0,
 										  .angle4=0, .coll4=0};
+uint8_t calibrate_status;
 
 /* USER CODE END PV */
 
@@ -77,6 +78,56 @@ static void MX_TIM3_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+//#define DEBUG
+#ifdef DEBUG
+void HAL_Delay(uint32_t Delay){
+	for(volatile int i = 0; i < Delay * 1000; ++i);
+}
+#endif
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
+
+	if(GPIO_PIN != GPIO_PIN_13) return;
+	//Map & calibrate potentiometers with servos on PC
+	unsigned int num_fingers = 1; //Update as we add more
+	HAL_Delay(10);
+	uint16_t pot_readings[5];
+	for(int i = 0; i<5; ++i){
+		pot_readings[i] = potRead(i % num_fingers); //Update per finger
+	}
+	if (calibrate_status == 0) {
+		HAL_Delay(10);
+		for(int i = 0; i<5; ++i){
+			servoSetPos(i % num_fingers, 0); //Update per finger
+		}
+		sendCommand(CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+		calibrate_status = 1;
+	}
+	else if (calibrate_status == 1) {
+		HAL_Delay(10);
+		for(int i = 0; i<5; ++i){
+			servoSetPos(i % num_fingers, 180); //Update per finger
+		}			//Will 180 break someone's fingers?
+		sendCommand(CALIBRATEMAX, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+		calibrate_status = 0;
+	}
+	else {
+		calibrate_status = 0;
+	}
+
+	/*
+	uint16_t tmp_readings[5];
+	HAL_Delay(2000);
+	for(int i = 0; i<5; ++i){
+		servoSetPos(i % num_fingers, 180); //Update per finger
+	}			//Will 180 break someone's fingers?
+	HAL_Delay(10); //Let DMA update
+	for(int i = 0; i<5; ++i){
+		tmp_readings[i] = potRead(i % num_fingers); //Update per finger
+	}
+	*/
+
+}
 /* USER CODE END 0 */
 
 /**
@@ -136,7 +187,7 @@ int main(void)
   servoSetPos(0, 0);
   uint16_t f1_ang;
 
-  // Function to test servo and potenstiometer
+  // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
   void servo_follow(){
 	pot_reading = potRead(0);
@@ -150,7 +201,7 @@ int main(void)
 
 //	ang_deg = (pot_reading * (180.0 / 4095));
 //	servoSetPos(0, ang_deg);
-	HAL_Delay(10);
+	HAL_Delay(50);
   }
 //
 
@@ -455,10 +506,32 @@ static void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

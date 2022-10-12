@@ -34,34 +34,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := haptic_hands_nucelo_ws
+BUILD_ARTIFACT_NAME := haptic_hands_nucleo_ws
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-haptic_hands_nucelo_ws.elf \
+haptic_hands_nucleo_ws.elf \
 
 MAP_FILES += \
-haptic_hands_nucelo_ws.map \
+haptic_hands_nucleo_ws.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-haptic_hands_nucelo_ws.list \
+haptic_hands_nucleo_ws.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: haptic_hands_nucelo_ws.elf secondary-outputs
+main-build: haptic_hands_nucleo_ws.elf secondary-outputs
 
 # Tool invocations
-haptic_hands_nucelo_ws.elf haptic_hands_nucelo_ws.map: $(OBJS) $(USER_OBJS) D:\EECS473_Project\haptic_hands_nucelo_ws\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "haptic_hands_nucelo_ws.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"D:\EECS473_Project\haptic_hands_nucelo_ws\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="haptic_hands_nucelo_ws.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+haptic_hands_nucleo_ws.elf haptic_hands_nucleo_ws.map: $(OBJS) $(USER_OBJS) C:\Users\Lore_\Desktop\HapticHands\haptic_hands_nucleo_ws\STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "haptic_hands_nucleo_ws.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Lore_\Desktop\HapticHands\haptic_hands_nucleo_ws\STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="haptic_hands_nucleo_ws.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -70,14 +70,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-haptic_hands_nucelo_ws.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "haptic_hands_nucelo_ws.list"
+haptic_hands_nucleo_ws.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "haptic_hands_nucleo_ws.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) default.size.stdout haptic_hands_nucelo_ws.elf haptic_hands_nucelo_ws.list haptic_hands_nucelo_ws.map
+	-$(RM) default.size.stdout haptic_hands_nucleo_ws.elf haptic_hands_nucleo_ws.list haptic_hands_nucleo_ws.map
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
