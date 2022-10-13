@@ -5,7 +5,6 @@
  *      Author: alan1
  */
 #include "comms.h"
-#include "main.h"
 
 extern UART_HandleTypeDef huart6;
 //extern FingerState finger_state;
@@ -13,23 +12,6 @@ extern UART_HandleTypeDef huart6;
 // UART buffer. Data will be received via interrupts
 uint8_t received_data[UART_BUFFER_SIZE] = {0};
 uint8_t rx_buffer[UART_BUFFER_SIZE];
-
-// UART callback. Moves data from uart buffer into received_data buffer
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-//	memcpy(received_data, rx_buffer, UART_BUFFER_SIZE);
-//	HAL_UART_Receive_IT(&huart6, rx_buffer, UART_BUFFER_SIZE);
-	updateFingerState();
-	HAL_UART_Receive_DMA(&huart6, received_data, UART_BUFFER_SIZE);
-}
-
-
-void UART_INIT(){
-	// Start listening for uart data
-	HAL_UART_Receive_DMA (&huart6, received_data, UART_BUFFER_SIZE);
-//	HAL_UART_Receive_IT(&huart6, rx_buffer, UART_BUFFER_SIZE);
-}
-
-
 
 // uint8 to uint16 helper function
 uint16_t uint8_to_uint16(uint8_t msb, uint8_t lsb){
@@ -96,11 +78,31 @@ void updateFingerState(){
 
 }
 
+// UART callback. Moves data from uart buffer into received_data buffer
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+//	memcpy(received_data, rx_buffer, UART_BUFFER_SIZE);
+//	HAL_UART_Receive_IT(&huart6, rx_buffer, UART_BUFFER_SIZE);
+	updateFingerState();
+	HAL_UART_Receive_DMA(&huart6, received_data, UART_BUFFER_SIZE);
+}
+
+
+void UART_INIT(){
+	// Start listening for uart data
+	HAL_UART_Receive_DMA (&huart6, received_data, UART_BUFFER_SIZE);
+//	HAL_UART_Receive_IT(&huart6, rx_buffer, UART_BUFFER_SIZE);
+}
+
 // Sets command in format
 // Sends ‘$,1,a1,a2,b1,b2,c1,c2,d1,d2,e1,e2’
 // Each a1, a2 represents 2 bytes = potentiometer value in degrees
 // Used for sending finger angle data to unity
+// Current BAUD rate: 115200
+
 void sendCommand(uint8_t cmd_type, uint16_t f1, uint16_t f2, uint16_t f3, uint16_t f4, uint16_t f5){
+#ifdef DEBUG
+	//HAL_Delay(1000);
+#endif
 	uint8_t cmd[12] = {'$', cmd_type,
 						(f1 >> 8) & 0x0F, f1 & 0xFF,
 						(f2 >> 8) & 0x0F, f2 & 0xFF,
@@ -108,7 +110,8 @@ void sendCommand(uint8_t cmd_type, uint16_t f1, uint16_t f2, uint16_t f3, uint16
 						(f4 >> 8) & 0x0F, f4 & 0xFF,
 						(f5 >> 8) & 0x0F, f5 & 0xFF};
 
-	HAL_UART_Transmit(&huart6, &cmd, sizeof(cmd), 200);
+	//Modified: cmd should be passed, not &cmd
+	HAL_UART_Transmit(&huart6, cmd, sizeof(cmd), 200);
 
 	return;
 }

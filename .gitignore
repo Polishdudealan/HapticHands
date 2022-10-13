@@ -1,4 +1,4 @@
 .metadata
 *.o
-haptic_hands_nucleo_ws/Debug
-"haptic_hands_nucleo_ws/*bug.launch"
+haptic_hands_*/Debug
+haptic_hands_*/*bug.launch

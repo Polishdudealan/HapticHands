@@ -1,2 +1,2 @@
-../Core/Src/potentiometer.c:16:10:potRead	16	static
-../Core/Src/potentiometer.c:21:6:HAL_ADC_ConvCpltCallback	16	static
+../Core/Src/potentiometer.c:12:10:potRead	16	static
+../Core/Src/potentiometer.c:17:6:HAL_ADC_ConvCpltCallback	16	static

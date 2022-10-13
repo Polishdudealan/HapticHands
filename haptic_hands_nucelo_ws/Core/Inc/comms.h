@@ -4,7 +4,6 @@
  *  Created on: Sep 29, 2022
  *      Author: atondryk
  */
-#include <stdint.h>
 #include "main.h"
 
 #define UART_BUFFER_SIZE 17
@@ -56,5 +55,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 // Each a1, a2 represents 2 bytes = potentiometer value in degrees
 // Used for sending finger angle data to unity
 void sendCommand(uint8_t cmd_type, uint16_t f1, uint16_t f2, uint16_t f3, uint16_t f4, uint16_t f5);
+
+void updateFingerState();
+
+void clearFingerState();
+
+void UART_INIT();
 
 #endif /* INC_COMMS_H_ */

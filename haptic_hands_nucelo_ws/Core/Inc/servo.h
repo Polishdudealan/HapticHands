@@ -4,7 +4,6 @@
  *  Created on: Sep 29, 2022
  *      Author: atondryk
  */
-#include <stdint.h>
 #include "main.h"
 
 #ifndef INC_SERVO_H_

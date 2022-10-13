@@ -42,7 +42,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
- ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
 TIM_HandleTypeDef htim2;
@@ -52,7 +52,6 @@ UART_HandleTypeDef huart6;
 DMA_HandleTypeDef hdma_usart6_rx;
 
 /* USER CODE BEGIN PV */
-uint32_t adc_buffer[10];
 FingerState finger_state = (FingerState){.valid=0,
 										  .angle0=0, .coll0=0,
 										  .angle1=0, .coll1=0,
@@ -78,7 +77,6 @@ static void MX_TIM3_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-//#define DEBUG
 #ifdef DEBUG
 void HAL_Delay(uint32_t Delay){
 	for(volatile int i = 0; i < Delay * 1000; ++i);
@@ -176,7 +174,7 @@ int main(void)
 
   // Start ADC dma
   // Timer 3 starts DMA conversion once per millisecond
-  HAL_ADC_Start_DMA(&hadc1, &adc_buffer, 1);
+
 
   // Starts UART receive interrupts
   UART_INIT();
@@ -189,8 +187,8 @@ int main(void)
 
   // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
-  void servo_follow(){
-	pot_reading = potRead(0);
+ void servo_follow(){
+	pot_reading = 0xAA /*potRead(0)*/;
 
 	// Send SOP, msb, lsb
 //	uint8_t sendData[4] = {'$', (pot_reading >> 8) & 0x0F, pot_reading & 0xFF};
