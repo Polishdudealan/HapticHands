@@ -174,7 +174,7 @@ int main(void)
 
   // Start ADC dma
   // Timer 3 starts DMA conversion once per millisecond
-
+  HAL_ADC_Start_DMA(&hadc1, &adc_buffer, 1);
 
   // Starts UART receive interrupts
   UART_INIT();
@@ -188,7 +188,7 @@ int main(void)
   // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
  void servo_follow(){
-	pot_reading = 0xAA /*potRead(0)*/;
+	pot_reading = potRead(0);
 
 	// Send SOP, msb, lsb
 //	uint8_t sendData[4] = {'$', (pot_reading >> 8) & 0x0F, pot_reading & 0xFF};
