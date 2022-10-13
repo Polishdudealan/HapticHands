@@ -58,7 +58,6 @@ FingerState finger_state = (FingerState){.valid=0,
 										  .angle2=0, .coll2=0,
 										  .angle3=0, .coll3=0,
 										  .angle4=0, .coll4=0};
-uint8_t calibrate_status;
 
 /* USER CODE END PV */
 
@@ -93,26 +92,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
 	for(int i = 0; i<5; ++i){
 		pot_readings[i] = potRead(i % num_fingers); //Update per finger
 	}
-	if (calibrate_status == 0) {
-		HAL_Delay(10);
-		for(int i = 0; i<5; ++i){
-			servoSetPos(i % num_fingers, 0); //Update per finger
-		}
-		sendCommand(CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
-		calibrate_status = 1;
+	static uint8_t calibrate_status;
+	HAL_Delay(10);
+	for(int i = 0; i<5; ++i){
+		servoSetPos(i % num_fingers, calibrate_status ? 180 : 0); //Update per finger
 	}
-	else if (calibrate_status == 1) {
-		HAL_Delay(10);
-		for(int i = 0; i<5; ++i){
-			servoSetPos(i % num_fingers, 180); //Update per finger
-		}			//Will 180 break someone's fingers?
-		sendCommand(CALIBRATEMAX, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
-		calibrate_status = 0;
-	}
-	else {
-		calibrate_status = 0;
-	}
-
+	sendCommand(calibrate_status ? CALIBRATEMAX : CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+	calibrate_status = !calibrate_status;
 	/*
 	uint16_t tmp_readings[5];
 	HAL_Delay(2000);
@@ -174,7 +160,7 @@ int main(void)
 
   // Start ADC dma
   // Timer 3 starts DMA conversion once per millisecond
-  HAL_ADC_Start_DMA(&hadc1, &adc_buffer, 1);
+  HAL_ADC_Start_DMA(&hadc1, adc_buffer, 1);
 
   // Starts UART receive interrupts
   UART_INIT();
