@@ -20,6 +20,8 @@ void servoSetPos(uint8_t finger, uint8_t deg);
 // Does not move the servo
 void servoSetStart(uint8_t finger, uint8_t deg);
 
+// Checks if a collision has occurred on any of the fingers
+void servoCheckCollisions();
 
 // Moves servo to previously set start position
 void servoReset(uint8_t finger);

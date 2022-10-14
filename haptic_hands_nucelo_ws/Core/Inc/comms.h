@@ -16,21 +16,24 @@
 typedef struct {
 	uint8_t valid;
 	// Angle (pot counts)
-	uint16_t angle0;
-	// Collision 1 = yes, 0 = no
-	uint8_t coll0;
+//	uint16_t angle0;
+//	// Collision 1 = yes, 0 = no
+//	uint8_t coll0;
+//
+//	uint16_t angle1;
+//	uint8_t coll1;
+//
+//	uint16_t angle2;
+//	uint8_t coll2;
+//
+//	uint16_t angle3;
+//	uint8_t coll3;
+//
+//	uint16_t angle4;
+//	uint8_t coll4;
 
-	uint16_t angle1;
-	uint8_t coll1;
-
-	uint16_t angle2;
-	uint8_t coll2;
-
-	uint16_t angle3;
-	uint8_t coll3;
-
-	uint16_t angle4;
-	uint8_t coll4;
+	uint16_t angles[5];
+	uint8_t collisions[5];
 } FingerState;
 
 extern FingerState finger_state;

@@ -52,12 +52,16 @@ UART_HandleTypeDef huart6;
 DMA_HandleTypeDef hdma_usart6_rx;
 
 /* USER CODE BEGIN PV */
+//FingerState finger_state = (FingerState){.valid=0,
+//										  .angle0=0, .coll0=0,
+//										  .angle1=0, .coll1=0,
+//										  .angle2=0, .coll2=0,
+//										  .angle3=0, .coll3=0,
+//										  .angle4=0, .coll4=0};
 FingerState finger_state = (FingerState){.valid=0,
-										  .angle0=0, .coll0=0,
-										  .angle1=0, .coll1=0,
-										  .angle2=0, .coll2=0,
-										  .angle3=0, .coll3=0,
-										  .angle4=0, .coll4=0};
+										  .angles = {0,0,0,0,0},
+										  .collisions = {0,0,0,0,0}
+										};
 
 /* USER CODE END PV */
 
@@ -112,6 +116,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
 	*/
 
 }
+
+uint32_t timer3_cnt;
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim == &htim3){
+		// increment ms counter
+		timer3_cnt = (timer3_cnt + 1) % 51;
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -170,24 +183,24 @@ int main(void)
   uint8_t ang_deg = 0;
   servoSetPos(0, 0);
   uint16_t f1_ang;
+//  uint32_t timer3_cnt;
 
   // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
- void servo_follow(){
+ void update(){
 	pot_reading = potRead(0);
 
 	// Send SOP, msb, lsb
-//	uint8_t sendData[4] = {'$', (pot_reading >> 8) & 0x0F, pot_reading & 0xFF};
-
-//	HAL_UART_Transmit(&huart6, &sendData, sizeof(sendData), 200);
-
 	sendCommand('1', pot_reading, pot_reading, pot_reading, pot_reading, pot_reading);
 
-//	ang_deg = (pot_reading * (180.0 / 4095));
-//	servoSetPos(0, ang_deg);
-	HAL_Delay(50);
+	servoCheckCollisions();
+
+	// reset servo if pot moves backwards
+	if(finger_state.angles[1] - pot_reading > 20){
+//	 if(pot_reading < finger_state.angles[1]){
+		 servoSetPos(0, 0);
+	}
   }
-//
 
 
   /* USER CODE END 2 */
@@ -196,33 +209,34 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	 servo_follow();
+
+	 // Runs every 50ms
+	 if(timer3_cnt == 50){
+		 update();
+	 }
 
 	 // Check finger states. FingerState struct should be getting auto-updated
 //	 updateFingerState();
-	 char coll0 = finger_state.coll0;
-	 char coll1 = finger_state.coll1;
-	 char coll2 = finger_state.coll2;
-	 char coll3 = finger_state.coll3;
-	 char coll4 = finger_state.coll4;
-	 // Checks for collision with index finger
-	 if(coll1 == '1'){
-		 // collision
-		 //uint16_t col = 0;
-		 pot_reading = potRead(0);
-		 ang_deg = (pot_reading * (180.0 / 4095));
-		 f1_ang = finger_state.angle1;
-		 uint8_t f1_ang_deg = (f1_ang * (180.0 / 4095));
-		 servoSetPos(0, f1_ang_deg);
+//	 char coll0 = finger_state.coll0;
+//	 char coll1 = finger_state.coll1;
+//	 char coll2 = finger_state.coll2;
+//	 char coll3 = finger_state.coll3;
+//	 char coll4 = finger_state.coll4;
+//	 // Checks for collision with index finger
+//	 if(finger_state.coll1 == '1'){
+//		 // collision
+//		 //uint16_t col = 0;
+//		 pot_reading = potRead(0);
+//		 ang_deg = (pot_reading * (180.0 / 4095));
+//		 f1_ang = finger_state.angle1;
+//		 uint8_t f1_ang_deg = (f1_ang * (180.0 / 4095.0));
+//		 servoSetPos(0, f1_ang_deg);
+//
+//
+//		 clearFingerState();
+//	 }
 
 
-		 clearFingerState();
-	 }
-
-	 // reset servo if pot moves backwards
-	 if(potRead(0) < f1_ang){
-		 servoSetPos(0, 0);
-	 }
 
 
 

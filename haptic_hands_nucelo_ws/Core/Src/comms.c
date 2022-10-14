@@ -23,20 +23,25 @@ uint16_t uint8_to_uint16(uint8_t msb, uint8_t lsb){
 void clearFingerState(){
 	finger_state.valid = 0;
 
-	 finger_state.angle0 = 0;
-	 finger_state.coll0 = 0;
+//	 finger_state.angle0 = 0;
+//	 finger_state.coll0 = 0;
+//
+//	 finger_state.angle1 = 0;
+//	 finger_state.coll1 = 0;
+//
+//	 finger_state.angle2 = 0;
+//	 finger_state.coll2 = 0;
+//
+//	 finger_state.angle3 = 0;
+//	 finger_state.coll3 = 0;
+//
+//	 finger_state.angle4 = 0;
+//	 finger_state.coll4 = 0;
 
-	 finger_state.angle1 = 0;
-	 finger_state.coll1 = 0;
-
-	 finger_state.angle2 = 0;
-	 finger_state.coll2 = 0;
-
-	 finger_state.angle3 = 0;
-	 finger_state.coll3 = 0;
-
-	 finger_state.angle4 = 0;
-	 finger_state.coll4 = 0;
+	 for(int i = 0; i < 5; i++){
+//		 finger_state.angles[i] = 0;
+		 finger_state.collisions[i] = 0;
+	 }
 }
 
 // Processes received data
@@ -51,20 +56,26 @@ void updateFingerState(){
 			 case POTENTIOMETER:
 				 finger_state.valid = 1;
 
-				 finger_state.angle0 = uint8_to_uint16(received_data[2], received_data[3]);
-				 finger_state.coll0 = received_data[4];
+//				 finger_state.angle0 = uint8_to_uint16(received_data[2], received_data[3]);
+//				 finger_state.coll0 = received_data[4];
+//
+//				 finger_state.angle1 = uint8_to_uint16(received_data[5], received_data[6]);
+//				 finger_state.coll1 = received_data[7];
+//
+//				 finger_state.angle2 = uint8_to_uint16(received_data[8], received_data[9]);
+//				 finger_state.coll2 = received_data[10];
+//
+//				 finger_state.angle3 = uint8_to_uint16(received_data[11], received_data[12]);
+//				 finger_state.coll3 = received_data[13];
+//
+//				 finger_state.angle4 = uint8_to_uint16(received_data[14], received_data[15]);
+//				 finger_state.coll4 = received_data[16];
 
-				 finger_state.angle1 = uint8_to_uint16(received_data[5], received_data[6]);
-				 finger_state.coll1 = received_data[7];
+				 for(int i = 0; i < 5; i++){
+					 finger_state.angles[i] = uint8_to_uint16(received_data[3 * i + 2], received_data[3 * i + 3]);
+					 finger_state.collisions[i] = received_data[3 * i + 4];
+				 }
 
-				 finger_state.angle2 = uint8_to_uint16(received_data[8], received_data[9]);
-				 finger_state.coll2 = received_data[10];
-
-				 finger_state.angle3 = uint8_to_uint16(received_data[11], received_data[12]);
-				 finger_state.coll3 = received_data[13];
-
-				 finger_state.angle4 = uint8_to_uint16(received_data[14], received_data[15]);
-				 finger_state.coll4 = received_data[16];
 				 break;
 
 			 default:
