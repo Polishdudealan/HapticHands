@@ -196,9 +196,10 @@ int main(void)
 	servoCheckCollisions();
 
 	// reset servo if pot moves backwards
-	if(finger_state.angles[1] - pot_reading > 20){
+	if((finger_state.collisions[1]) && (finger_state.angles[1] - pot_reading > 20)){
 //	 if(pot_reading < finger_state.angles[1]){
 		 servoSetPos(0, 0);
+		 clearFingerState();
 	}
   }
 

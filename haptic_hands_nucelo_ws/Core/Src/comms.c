@@ -74,6 +74,7 @@ void updateFingerState(){
 				 for(int i = 0; i < 5; i++){
 					 finger_state.angles[i] = uint8_to_uint16(received_data[3 * i + 2], received_data[3 * i + 3]);
 					 finger_state.collisions[i] = received_data[3 * i + 4];
+					 finger_state.angles[1] = potRead(0);
 				 }
 
 				 break;

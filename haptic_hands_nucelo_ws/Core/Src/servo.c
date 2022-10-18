@@ -30,7 +30,8 @@ void servoSetPos(uint8_t finger, uint8_t deg){
 
 // Checks if a collision has occurred on any of the fingers
 void servoCheckCollisions(){
-	float deg_conv = 180.0 / 4095.0;
+//	float deg_conv = 180.0 / 4095.0;
+	float deg_conv = 360.0 / 4095.0;
 	// TODO uncomment this for 5 fingers
 //	for(int i = 0; i < 5; i++){
 //		if(finger_state.collisions[i] == '1'){
@@ -41,7 +42,7 @@ void servoCheckCollisions(){
 	if(finger_state.collisions[1] == '1'){
 			servoSetPos(0, finger_state.angles[1] * deg_conv);
 		}
-	clearFingerState();
+//	clearFingerState();
 //	char coll0 = finger_state.coll0;
 //	char coll1 = finger_state.coll1;
 //	char coll2 = finger_state.coll2;
