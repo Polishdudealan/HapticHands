@@ -19,9 +19,9 @@ void servoInit(uint8_t finger, uint8_t pin){
 // Takes in degrees
 void servoSetPos(uint8_t finger, uint8_t deg){
 	// Modification to flip servo direction
-	deg = 180 - deg;
+//	deg = 180 - deg;
     // 4000 offset because control ranges from 1ms-2ms duty cycle
-	// 0.045 is determined by 180 deg / 4000 cnts per millisecond
+	// 0.045 is determined by 180 deg / 8000 cnts per millisecond
 	// 2 is because 180 deg is mapped across 2 ms, not 1
 	// servo seems to be mapped from 2000-10000 => 0-180 deg
 	// This is NOT what the spec said
@@ -30,8 +30,8 @@ void servoSetPos(uint8_t finger, uint8_t deg){
 
 // Checks if a collision has occurred on any of the fingers
 void servoCheckCollisions(){
-//	float deg_conv = 180.0 / 4095.0;
-	float deg_conv = 360.0 / 4095.0;
+	float deg_conv = 180.0 / 4096.0;
+//	float deg_conv = 360.0 / 4095.0;
 	// TODO uncomment this for 5 fingers
 //	for(int i = 0; i < 5; i++){
 //		if(finger_state.collisions[i] == '1'){

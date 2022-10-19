@@ -181,7 +181,7 @@ int main(void)
   // Variable initialization
   volatile uint16_t pot_reading;
   uint8_t ang_deg = 0;
-  servoSetPos(0, 0);
+  servoSetPos(0, 180);
   uint16_t f1_ang;
 //  uint32_t timer3_cnt;
 
@@ -196,11 +196,23 @@ int main(void)
 	servoCheckCollisions();
 
 	// reset servo if pot moves backwards
-	if((finger_state.collisions[1]) && (finger_state.angles[1] - pot_reading > 20)){
-//	 if(pot_reading < finger_state.angles[1]){
-		 servoSetPos(0, 0);
-		 clearFingerState();
+	if((finger_state.collisions[1])){
+
+		 if((finger_state.angles[1] - pot_reading > 200)){
+			 clearFingerState();
+		}
 	}
+	else{
+		float deg_conv = 180.0 / 4096.0;
+		 servoSetPos(0, pot_reading * deg_conv + 50);
+	}
+//	if((finger_state.angles[1] - pot_reading > 200)){
+////	 if(pot_reading < finger_state.angles[1]){
+////		 servoSetPos(0, 180);
+//		 clearFingerState();
+//	}
+//
+
   }
 
 
@@ -211,8 +223,8 @@ int main(void)
   while (1)
   {
 
-	 // Runs every 50ms
-	 if(timer3_cnt == 50){
+	 // Runs every 25ms
+	 if(timer3_cnt % 25 == 0){
 		 update();
 	 }
 
