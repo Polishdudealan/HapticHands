@@ -25,7 +25,29 @@ void servoSetPos(uint8_t finger, uint8_t deg){
 	// 2 is because 180 deg is mapped across 2 ms, not 1
 	// servo seems to be mapped from 2000-10000 => 0-180 deg
 	// This is NOT what the spec said
-	TIM2->CCR1 = (uint16_t)(2.0*(deg / 0.045) + 2000);
+//	TIM2->CCR1 = (uint16_t)(2.0*(deg / 0.045) + 2000);
+
+	// Try this for multi-finger
+	uint16_t val = (deg * (8000.0 / 180.0) * 2.0) - 2000.0;
+	switch(finger){
+		case 0:
+			TIM2->CCR2 = val;
+			break;
+		case 1:
+			TIM2->CCR1 = val;
+			break;
+		case 2:
+			TIM2->CCR3 = val;
+			break;
+		case 3:
+			TIM5->CCR1 = val;
+			break;
+		case 4:
+			TIM5->CCR2 = val;
+			break;
+		default:
+			break;
+	}
 }
 
 // Checks if a collision has occurred on any of the fingers
@@ -33,33 +55,26 @@ void servoCheckCollisions(){
 	float deg_conv = 180.0 / 4096.0;
 //	float deg_conv = 360.0 / 4095.0;
 	// TODO uncomment this for 5 fingers
-//	for(int i = 0; i < 5; i++){
-//		if(finger_state.collisions[i] == '1'){
-//			servoSetPos(i, finger_state.angles[i] * deg_conv);
-//		}
-//	}
-	// For index finger only
-	if(finger_state.collisions[1] == '1'){
-			servoSetPos(0, finger_state.angles[1] * deg_conv);
+
+	for(int i = 0; i < 5; i++){
+		if(finger_state.collisions[i] == '1'){
+			servoSetPos(i, finger_state.angles[i] * deg_conv);
+//			if((finger_state.angles[i] - pot_reading > 200)){
+//				 clearFingerState();
+//			}
 		}
-//	clearFingerState();
-//	char coll0 = finger_state.coll0;
-//	char coll1 = finger_state.coll1;
-//	char coll2 = finger_state.coll2;
-//	char coll3 = finger_state.coll3;
-//	char coll4 = finger_state.coll4;
-	// Checks for collision with index finger
-//	if(finger_state.coll1 == '1'){
-//		pot_reading = potRead(0);
-//		ang_deg = (pot_reading * (180.0 / 4095));
-//		f1_ang = finger_state.angle1;
-//		uint8_t f1_ang_deg = (f1_ang * (180.0 / 4095.0));
-//		servoSetPos(0, f1_ang_deg);
-//		servoSetPos()
+		else{
+			clearCollision(i);
+			uint16_t p = potRead(i);
+			servoSetPos(i, p * deg_conv + 50);
+		}
+	}
+	// For index finger only
+//	if(finger_state.collisions[1] == '1'){
+//			servoSetPos(0, finger_state.angles[1] * deg_conv);
+//	}
 
 
-//		clearFingerState();
-// }
 }
 
 

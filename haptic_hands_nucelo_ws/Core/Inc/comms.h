@@ -63,6 +63,8 @@ void updateFingerState();
 
 void clearFingerState();
 
+void clearCollision(uint8_t finger);
+
 void UART_INIT();
 
 #endif /* INC_COMMS_H_ */

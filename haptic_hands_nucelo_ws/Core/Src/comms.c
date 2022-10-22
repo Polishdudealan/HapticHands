@@ -19,29 +19,19 @@ uint16_t uint8_to_uint16(uint8_t msb, uint8_t lsb){
 	return val;
 }
 
-// Clears finger state
+// Clears finger state - unused now
 void clearFingerState(){
 	finger_state.valid = 0;
-
-//	 finger_state.angle0 = 0;
-//	 finger_state.coll0 = 0;
-//
-//	 finger_state.angle1 = 0;
-//	 finger_state.coll1 = 0;
-//
-//	 finger_state.angle2 = 0;
-//	 finger_state.coll2 = 0;
-//
-//	 finger_state.angle3 = 0;
-//	 finger_state.coll3 = 0;
-//
-//	 finger_state.angle4 = 0;
-//	 finger_state.coll4 = 0;
 
 	 for(int i = 0; i < 5; i++){
 //		 finger_state.angles[i] = 0;
 		 finger_state.collisions[i] = 0;
 	 }
+}
+
+void clearCollision(uint8_t finger){
+	finger_state.valid = 0;
+	finger_state.collisions[finger] = 0;
 }
 
 // Processes received data
@@ -74,7 +64,7 @@ void updateFingerState(){
 				 for(int i = 0; i < 5; i++){
 					 finger_state.angles[i] = uint8_to_uint16(received_data[3 * i + 2], received_data[3 * i + 3]);
 					 finger_state.collisions[i] = received_data[3 * i + 4];
-					 finger_state.angles[1] = potRead(0);
+//					 finger_state.angles[i] = potRead(i);
 				 }
 
 				 break;

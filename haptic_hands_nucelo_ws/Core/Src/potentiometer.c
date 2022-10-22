@@ -7,11 +7,13 @@
 #include "potentiometer.h"
 #include <string.h>
 
-uint32_t buf[10];
-uint32_t adc_buffer[10];
+// Should contain only up to 5 values. One for each ADC channel.
+// TODO double check all channels are being initialized properly
+uint16_t buf[5];
+uint16_t adc_buffer[5];
 
 uint16_t potRead(uint8_t finger){
-	return buf[0];
+	return buf[finger];
 }
 
 // Callback for when conversion finishes

@@ -34,6 +34,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define NUM_FINGERS 5
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -42,22 +44,18 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc1;
+ ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
+TIM_HandleTypeDef htim5;
 
 UART_HandleTypeDef huart6;
 DMA_HandleTypeDef hdma_usart6_rx;
 
 /* USER CODE BEGIN PV */
-//FingerState finger_state = (FingerState){.valid=0,
-//										  .angle0=0, .coll0=0,
-//										  .angle1=0, .coll1=0,
-//										  .angle2=0, .coll2=0,
-//										  .angle3=0, .coll3=0,
-//										  .angle4=0, .coll4=0};
+
 FingerState finger_state = (FingerState){.valid=0,
 										  .angles = {0,0,0,0,0},
 										  .collisions = {0,0,0,0,0}
@@ -73,6 +71,7 @@ static void MX_ADC1_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -90,30 +89,19 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
 
 	if(GPIO_PIN != GPIO_PIN_13) return;
 	//Map & calibrate potentiometers with servos on PC
-	unsigned int num_fingers = 1; //Update as we add more
+//	unsigned int num_fingers = 1; //Update as we add more
 	HAL_Delay(10);
-	uint16_t pot_readings[5];
+	uint16_t pot_readings[NUM_FINGERS];
 	for(int i = 0; i<5; ++i){
-		pot_readings[i] = potRead(i % num_fingers); //Update per finger
+		pot_readings[i] = potRead(i % NUM_FINGERS); //Update per finger
 	}
 	static uint8_t calibrate_status;
 	HAL_Delay(10);
-	for(int i = 0; i<5; ++i){
-		servoSetPos(i % num_fingers, calibrate_status ? 180 : 0); //Update per finger
+	for(int i = 0; i<NUM_FINGERS; ++i){
+		servoSetPos(i % NUM_FINGERS, calibrate_status ? 180 : 0); //Update per finger
 	}
 	sendCommand(calibrate_status ? CALIBRATEMAX : CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 	calibrate_status = !calibrate_status;
-	/*
-	uint16_t tmp_readings[5];
-	HAL_Delay(2000);
-	for(int i = 0; i<5; ++i){
-		servoSetPos(i % num_fingers, 180); //Update per finger
-	}			//Will 180 break someone's fingers?
-	HAL_Delay(10); //Let DMA update
-	for(int i = 0; i<5; ++i){
-		tmp_readings[i] = potRead(i % num_fingers); //Update per finger
-	}
-	*/
 
 }
 
@@ -160,6 +148,7 @@ int main(void)
   MX_USART6_UART_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -173,13 +162,13 @@ int main(void)
 
   // Start ADC dma
   // Timer 3 starts DMA conversion once per millisecond
-  HAL_ADC_Start_DMA(&hadc1, adc_buffer, 1);
+  HAL_ADC_Start_DMA(&hadc1, adc_buffer, 5);
 
   // Starts UART receive interrupts
   UART_INIT();
 
   // Variable initialization
-  volatile uint16_t pot_reading;
+  uint16_t pot_readings[5];
   uint8_t ang_deg = 0;
   servoSetPos(0, 180);
   uint16_t f1_ang;
@@ -188,30 +177,30 @@ int main(void)
   // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
  void update(){
-	pot_reading = potRead(0);
+	 for(int i = 0; i < NUM_FINGERS; i++){
+		 pot_readings[i] = potRead(i);
+	 }
 
 	// Send SOP, msb, lsb
-	sendCommand('1', pot_reading, pot_reading, pot_reading, pot_reading, pot_reading);
+	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 
 	servoCheckCollisions();
 
-	// reset servo if pot moves backwards
-	if((finger_state.collisions[1])){
-
-		 if((finger_state.angles[1] - pot_reading > 200)){
-			 clearFingerState();
-		}
-	}
-	else{
-		float deg_conv = 180.0 / 4096.0;
-		 servoSetPos(0, pot_reading * deg_conv + 50);
-	}
-//	if((finger_state.angles[1] - pot_reading > 200)){
-////	 if(pot_reading < finger_state.angles[1]){
-////		 servoSetPos(0, 180);
-//		 clearFingerState();
-//	}
+	// reset servo if pot moves backwards while a collision is occuring
+	// TODO change for multiple fingers
+//	if((finger_state.collisions[1])){
 //
+//		 if((finger_state.angles[1] - pot_readings[1] > 200)){
+//			 clearFingerState();
+//		}
+//	}
+//	else{
+//		float deg_conv = 180.0 / 4096.0;
+//		 servoSetPos(0, pot_readings[1] * deg_conv + 50);
+//	}
+
+
+
 
   }
 
@@ -227,29 +216,6 @@ int main(void)
 	 if(timer3_cnt % 25 == 0){
 		 update();
 	 }
-
-	 // Check finger states. FingerState struct should be getting auto-updated
-//	 updateFingerState();
-//	 char coll0 = finger_state.coll0;
-//	 char coll1 = finger_state.coll1;
-//	 char coll2 = finger_state.coll2;
-//	 char coll3 = finger_state.coll3;
-//	 char coll4 = finger_state.coll4;
-//	 // Checks for collision with index finger
-//	 if(finger_state.coll1 == '1'){
-//		 // collision
-//		 //uint16_t col = 0;
-//		 pot_reading = potRead(0);
-//		 ang_deg = (pot_reading * (180.0 / 4095));
-//		 f1_ang = finger_state.angle1;
-//		 uint8_t f1_ang_deg = (f1_ang * (180.0 / 4095.0));
-//		 servoSetPos(0, f1_ang_deg);
-//
-//
-//		 clearFingerState();
-//	 }
-
-
 
 
 
@@ -325,13 +291,13 @@ static void MX_ADC1_Init(void)
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc1.Init.ScanConvMode = DISABLE;
+  hadc1.Init.ScanConvMode = ENABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
   hadc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T3_TRGO;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 1;
+  hadc1.Init.NbrOfConversion = 5;
   hadc1.Init.DMAContinuousRequests = ENABLE;
   hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
@@ -341,9 +307,45 @@ static void MX_ADC1_Init(void)
 
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
-  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Rank = 2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Rank = 3;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Rank = 4;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Rank = 5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -406,6 +408,14 @@ static void MX_TIM2_Init(void)
   {
     Error_Handler();
   }
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN TIM2_Init 2 */
 
   /* USER CODE END TIM2_Init 2 */
@@ -455,6 +465,69 @@ static void MX_TIM3_Init(void)
   /* USER CODE BEGIN TIM3_Init 2 */
 
   /* USER CODE END TIM3_Init 2 */
+
+}
+
+/**
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void)
+{
+
+  /* USER CODE BEGIN TIM5_Init 0 */
+
+  /* USER CODE END TIM5_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM5_Init 1 */
+
+  /* USER CODE END TIM5_Init 1 */
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = 3;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = 80000;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 0;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_TIM_PWM_ConfigChannel(&htim5, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM5_Init 2 */
+
+  /* USER CODE END TIM5_Init 2 */
+  HAL_TIM_MspPostInit(&htim5);
 
 }
 
@@ -527,6 +600,10 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, vib4_Pin|vib3_Pin|vib2_Pin|vib1_Pin
+                          |vib0_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
@@ -539,6 +616,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : vib4_Pin vib3_Pin vib2_Pin vib1_Pin
+                           vib0_Pin */
+  GPIO_InitStruct.Pin = vib4_Pin|vib3_Pin|vib2_Pin|vib1_Pin
+                          |vib0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);

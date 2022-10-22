@@ -59,6 +59,36 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define servo3_Pin GPIO_PIN_0
+#define servo3_GPIO_Port GPIOA
+#define servo4_Pin GPIO_PIN_1
+#define servo4_GPIO_Port GPIOA
+#define pot0_Pin GPIO_PIN_5
+#define pot0_GPIO_Port GPIOA
+#define pot1_Pin GPIO_PIN_6
+#define pot1_GPIO_Port GPIOA
+#define pot2_Pin GPIO_PIN_7
+#define pot2_GPIO_Port GPIOA
+#define pot3_Pin GPIO_PIN_0
+#define pot3_GPIO_Port GPIOB
+#define pot4_Pin GPIO_PIN_1
+#define pot4_GPIO_Port GPIOB
+#define servo2_Pin GPIO_PIN_10
+#define servo2_GPIO_Port GPIOB
+#define vib4_Pin GPIO_PIN_8
+#define vib4_GPIO_Port GPIOA
+#define vib3_Pin GPIO_PIN_9
+#define vib3_GPIO_Port GPIOA
+#define vib2_Pin GPIO_PIN_10
+#define vib2_GPIO_Port GPIOA
+#define vib1_Pin GPIO_PIN_11
+#define vib1_GPIO_Port GPIOA
+#define vib0_Pin GPIO_PIN_12
+#define vib0_GPIO_Port GPIOA
+#define servo1_Pin GPIO_PIN_15
+#define servo1_GPIO_Port GPIOA
+#define servo0_Pin GPIO_PIN_3
+#define servo0_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
