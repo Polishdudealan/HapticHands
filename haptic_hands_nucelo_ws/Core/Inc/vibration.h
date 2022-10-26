@@ -4,6 +4,7 @@
  *  Created on: Sep 29, 2022
  *      Author: atondryk
  */
+#include "main.h"
 
 #ifndef INC_VIBRATION_H_
 #define INC_VIBRATION_H_

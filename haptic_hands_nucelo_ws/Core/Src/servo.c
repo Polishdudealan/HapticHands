@@ -28,7 +28,7 @@ void servoSetPos(uint8_t finger, uint8_t deg){
 //	TIM2->CCR1 = (uint16_t)(2.0*(deg / 0.045) + 2000);
 
 	// Try this for multi-finger
-	uint16_t val = (deg * (8000.0 / 180.0) * 2.0) - 2000.0;
+	uint16_t val = ((deg + 22.5 + 22.5) * (8000.0 / 180.0) * 2.0) - 2000.0;
 	switch(finger){
 		case 0:
 			TIM2->CCR2 = val;
@@ -50,33 +50,34 @@ void servoSetPos(uint8_t finger, uint8_t deg){
 	}
 }
 
-// Checks if a collision has occurred on any of the fingers
-void servoCheckCollisions(){
-	float deg_conv = 180.0 / 4096.0;
-//	float deg_conv = 360.0 / 4095.0;
-	// TODO uncomment this for 5 fingers
-
-	for(int i = 0; i < 5; i++){
-		if(finger_state.collisions[i] == '1'){
-			servoSetPos(i, finger_state.angles[i] * deg_conv);
-//			if((finger_state.angles[i] - pot_reading > 200)){
-//				 clearFingerState();
-//			}
-		}
-		else{
-			clearCollision(i);
-			uint16_t p = potRead(i);
-			servoSetPos(i, p * deg_conv + 50);
-		}
+/*
+ *
+ * Write servo position with the raw 2byte value from
+ * the potentiometer
+ *
+ */
+void servoSetPosRaw(uint8_t finger, uint16_t deg){
+	uint16_t val = ((deg + 512 + 512) / 4096.0 * 8000.0 * 2.0) - 2000.0;
+	switch(finger){
+		case 0:
+			TIM2->CCR2 = val;
+			break;
+		case 1:
+			TIM2->CCR1 = val;
+			break;
+		case 2:
+			TIM2->CCR3 = val;
+			break;
+		case 3:
+			TIM5->CCR1 = val;
+			break;
+		case 4:
+			TIM5->CCR2 = val;
+			break;
+		default:
+			break;
 	}
-	// For index finger only
-//	if(finger_state.collisions[1] == '1'){
-//			servoSetPos(0, finger_state.angles[1] * deg_conv);
-//	}
-
-
 }
-
 
 // Sets a start/zero position of the servo
 // Does not move the servo

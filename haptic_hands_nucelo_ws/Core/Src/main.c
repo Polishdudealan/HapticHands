@@ -24,6 +24,7 @@
 #include "potentiometer.h"
 #include "servo.h"
 #include "comms.h"
+#include "vibration.h"
 
 /* USER CODE END Includes */
 
@@ -61,6 +62,9 @@ FingerState finger_state = (FingerState){.valid=0,
 										  .collisions = {0,0,0,0,0}
 										};
 
+uint8_t calibrate_status = 0;
+uint8_t vibration_state[5] = {0, 0, 0, 0, 0};
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -95,7 +99,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
 	for(int i = 0; i<5; ++i){
 		pot_readings[i] = potRead(i % NUM_FINGERS); //Update per finger
 	}
-	static uint8_t calibrate_status;
+	//static
 	HAL_Delay(10);
 	for(int i = 0; i<NUM_FINGERS; ++i){
 		servoSetPos(i % NUM_FINGERS, calibrate_status ? 180 : 0); //Update per finger
@@ -170,9 +174,44 @@ int main(void)
   // Variable initialization
   uint16_t pot_readings[5];
   uint8_t ang_deg = 0;
-  servoSetPos(0, 180);
+  for (int i = 0; i < 5; i++) {
+	  servoSetPos(i, 180);
+  }
   uint16_t f1_ang;
 //  uint32_t timer3_cnt;
+
+  // Checks if a collision has occurred on any of the fingers
+  void checkCollisions(){
+	for(int i = 0; i < NUM_FINGERS; i++){
+		if(finger_state.collisions[i] == 1){
+			servoSetPosRaw(i, finger_state.angles[i]);
+	//			if((finger_state.angles[i] - pot_reading > 200)){
+	//				 clearFingerState();
+	//			}
+			if (vibration_state[i] == 0) {
+				vibration_state[i] = 5; // this value determines how long it will vibrates, vibrate_period = n * update_period
+				vibrationOn(i);
+			}
+		}
+		else{
+			uint16_t p = potRead(i);
+			servoSetPosRaw(i, p);// + 30 / 180 * 4096);
+			vibration_state[i] = 0;
+		}
+	}
+  }
+
+  void checkVibration(){
+	  for (int i = 0; i < NUM_FINGERS; i++){
+		  if (vibration_state[i] > 1){
+			  vibration_state[i]--;
+
+		  }
+		  else if (vibration_state[i] == 1) {
+			  vibrationOff(i);
+		  }
+	  }
+  }
 
   // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
@@ -184,7 +223,8 @@ int main(void)
 	// Send SOP, msb, lsb
 	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 
-	servoCheckCollisions();
+	checkCollisions();
+	checkVibration();
 
 	// reset servo if pot moves backwards while a collision is occuring
 	// TODO change for multiple fingers
@@ -199,26 +239,19 @@ int main(void)
 //		 servoSetPos(0, pot_readings[1] * deg_conv + 50);
 //	}
 
-
-
-
   }
-
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+ vibrationOn(0);
   while (1)
   {
-
 	 // Runs every 25ms
 	 if(timer3_cnt % 25 == 0){
 		 update();
 	 }
-
-
-
 
     /* USER CODE END WHILE */
 

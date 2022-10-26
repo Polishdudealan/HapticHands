@@ -16,12 +16,16 @@ void servoInit(uint8_t finger, uint8_t pin);
 // Takes in degrees 0-180
 void servoSetPos(uint8_t finger, uint8_t deg);
 
+// Sets position of the servo
+// Takes in degrees 0-4096
+void servoSetPosRaw(uint8_t finger, uint16_t deg);
+
 // Sets a start/zero position of the servo
 // Does not move the servo
 void servoSetStart(uint8_t finger, uint8_t deg);
 
 // Checks if a collision has occurred on any of the fingers
-void servoCheckCollisions();
+//void servoCheckCollisions();
 
 // Moves servo to previously set start position
 void servoReset(uint8_t finger);

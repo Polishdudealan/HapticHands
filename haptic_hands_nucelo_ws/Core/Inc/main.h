@@ -85,10 +85,10 @@ void Error_Handler(void);
 #define vib1_GPIO_Port GPIOA
 #define vib0_Pin GPIO_PIN_12
 #define vib0_GPIO_Port GPIOA
-#define servo1_Pin GPIO_PIN_15
-#define servo1_GPIO_Port GPIOA
-#define servo0_Pin GPIO_PIN_3
-#define servo0_GPIO_Port GPIOB
+#define servo0_Pin GPIO_PIN_15
+#define servo0_GPIO_Port GPIOA
+#define servo1_Pin GPIO_PIN_3
+#define servo1_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
