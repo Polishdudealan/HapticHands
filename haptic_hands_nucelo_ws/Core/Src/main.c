@@ -160,6 +160,10 @@ int main(void)
   //  uint32_t buffer[10];
   // Start timer
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
 
   // Timer for DMA ADC conversions
   HAL_TIM_Base_Start_IT(&htim3);
