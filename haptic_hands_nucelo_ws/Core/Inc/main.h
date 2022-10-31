@@ -59,10 +59,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define servo3_Pin GPIO_PIN_0
-#define servo3_GPIO_Port GPIOA
 #define servo4_Pin GPIO_PIN_1
 #define servo4_GPIO_Port GPIOA
+#define servo3_Pin GPIO_PIN_2
+#define servo3_GPIO_Port GPIOA
 #define pot0_Pin GPIO_PIN_5
 #define pot0_GPIO_Port GPIOA
 #define pot1_Pin GPIO_PIN_6

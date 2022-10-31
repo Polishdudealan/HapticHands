@@ -27,7 +27,7 @@ void servoSetVal(uint8_t finger, uint16_t val) {
 			TIM2->CCR3 = val;
 			break;
 		case 3:
-			TIM5->CCR1 = val;
+			TIM5->CCR3 = val;
 			break;
 		case 4:
 			TIM5->CCR2 = val;
