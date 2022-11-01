@@ -27,10 +27,10 @@ void servoSetVal(uint8_t finger, uint16_t val) {
 			TIM2->CCR3 = val;
 			break;
 		case 3:
-			TIM5->CCR3 = val;
+			TIM4->CCR1 = val;
 			break;
 		case 4:
-			TIM5->CCR2 = val;
+			TIM4->CCR2 = val;
 			break;
 		default:
 			break;
@@ -49,7 +49,7 @@ void servoSetPos(uint8_t finger, uint8_t deg){
 	// This is NOT what the spec said
 //	TIM2->CCR1 = (uint16_t)(2.0*(deg / 0.045) + 2000);
 	// Try this for multi-finger
-	uint16_t val = ((deg + 22.5 + 22.5) * (8000.0 / 180.0) * 2.0) - 2000.0;
+	uint16_t val = 1000 + (double) 4000.0 * deg / 180.0;
 	servoSetVal(finger, val);
 }
 
@@ -60,7 +60,7 @@ void servoSetPos(uint8_t finger, uint8_t deg){
  *
  */
 void servoSetPosRaw(uint8_t finger, uint16_t deg){
-	uint16_t val = ((deg + 512 + 512) / 4096.0 * 8000.0 * 2.0) - 2000.0;
+	uint16_t val = 1000 + (double) 4000.0 * deg / 0x0FFF;
 	servoSetVal(finger, val);
 }
 
