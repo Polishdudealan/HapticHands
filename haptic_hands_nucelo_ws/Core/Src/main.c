@@ -64,6 +64,7 @@ FingerState finger_state = (FingerState){.valid=0,
 
 uint8_t calibrate_status = 0;
 uint8_t vibration_state[5] = {0, 0, 0, 0, 0};
+uint8_t collision_end_status[5] = {0, 0, 0, 0, 0};
 
 /* USER CODE END PV */
 
@@ -193,13 +194,14 @@ int main(void)
 	//				 clearFingerState();
 	//			}
 			if (vibration_state[i] == 0) {
-				vibration_state[i] = 5; // this value determines how long it will vibrates, vibrate_period = n * update_period
+				vibration_state[i] = 20; // this value determines how long it will vibrates, vibrate_period = n * update_period
 				vibrationOn(i);
 			}
 		}
 		else{
 			uint16_t p = potRead(i);
 			servoSetPosRaw(i, p);// + 30 / 180 * 4096);
+			vibrationOff(i);
 			vibration_state[i] = 0;
 		}
 	}
@@ -209,7 +211,6 @@ int main(void)
 	  for (int i = 0; i < NUM_FINGERS; i++){
 		  if (vibration_state[i] > 1){
 			  vibration_state[i]--;
-
 		  }
 		  else if (vibration_state[i] == 1) {
 			  vibrationOff(i);
@@ -217,15 +218,17 @@ int main(void)
 	  }
   }
 
+void update_command() {
+	// Send SOP, msb, lsb
+	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+}
+
   // Function to test servo and potentiometer
   // Reads pot value, sends it via uart, moves servo accordingly
  void update(){
 	 for(int i = 0; i < NUM_FINGERS; i++){
 		 pot_readings[i] = potRead(i);
 	 }
-
-	// Send SOP, msb, lsb
-	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 
 	checkCollisions();
 	checkVibration();
@@ -249,13 +252,18 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
- vibrationOn(0);
+  //vibrationOn(0);
   while (1)
   {
 	 // Runs every 25ms
-	 if(timer3_cnt % 25 == 0){
+	 if(timer3_cnt % 10 == 0){
 		 update();
 	 }
+
+	 if(timer3_cnt % 50 == 0){
+		 update_command();
+	 }
+
 
     /* USER CODE END WHILE */
 
