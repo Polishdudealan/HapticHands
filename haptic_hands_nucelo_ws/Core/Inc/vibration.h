@@ -9,9 +9,6 @@
 #ifndef INC_VIBRATION_H_
 #define INC_VIBRATION_H_
 
-uint16_t vibration_pin[5];
-uint8_t vibration_state[5];
-
 void checkVibration();
 
 void vibrationOnForDuration(uint8_t finger, uint8_t time);

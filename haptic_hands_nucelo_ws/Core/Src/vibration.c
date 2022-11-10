@@ -17,14 +17,14 @@ uint16_t vibration_pin[5] = {
 uint8_t vibration_state[5] = {0, 0, 0, 0, 0};
 
 void vibrationOnForDuration(uint8_t finger, uint8_t time) {
-	if (vibration_state[i] == 0) {
-		vibration_state[i] = time; // this value determines how long it will vibrates, vibrate_period = n * update_period
-		vibrationOn(i);
+	if (vibration_state[finger] == 0) {
+		vibration_state[finger] = time; // this value determines how long it will vibrates, vibrate_period = n * update_period
+		vibrationOn(finger);
 	}
 }
 
 void resetVibration(uint8_t finger){
-	vibrationOff(i);
+	vibrationOff(finger);
 	vibration_state[finger] = 0;
 }
 
@@ -39,7 +39,7 @@ void vibrationOff(uint8_t finger) {
 }
 
 void checkVibration(){
-	  for (int i = 0; i < NUM_FINGERS; i++){
+	  for (int i = 0; i < 5; i++){
 		  if (vibration_state[i] > 1){
 			  vibration_state[i]--;
 		  }
