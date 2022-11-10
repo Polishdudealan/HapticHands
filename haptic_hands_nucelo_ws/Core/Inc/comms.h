@@ -15,29 +15,11 @@
 // finger states
 typedef struct {
 	uint8_t valid;
-	// Angle (pot counts)
-//	uint16_t angle0;
-//	// Collision 1 = yes, 0 = no
-//	uint8_t coll0;
-//
-//	uint16_t angle1;
-//	uint8_t coll1;
-//
-//	uint16_t angle2;
-//	uint8_t coll2;
-//
-//	uint16_t angle3;
-//	uint8_t coll3;
-//
-//	uint16_t angle4;
-//	uint8_t coll4;
-
 	uint16_t angles[5];
 	uint8_t collisions[5];
 } FingerState;
 
 extern FingerState finger_state;
-
 
 // Enum for tags
 extern enum CMD_TYPES{
@@ -49,7 +31,6 @@ extern enum CMD_TYPES{
 // uint8 to uint16 helper function
 uint16_t uint8_to_uint16(uint8_t msb, uint8_t lsb);
 
-
 // UART callback. Moves data from uart buffer into received_data buffer
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 
@@ -60,10 +41,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 void sendCommand(uint8_t cmd_type, uint16_t f1, uint16_t f2, uint16_t f3, uint16_t f4, uint16_t f5);
 
 void updateFingerState();
-
-void clearFingerState();
-
-void clearCollision(uint8_t finger);
 
 void UART_INIT();
 

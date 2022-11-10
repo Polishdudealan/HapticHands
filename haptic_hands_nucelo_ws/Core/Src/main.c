@@ -36,6 +36,8 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define NUM_FINGERS 5
+#define UPDATE_TICK 10
+#define UPDATE_COMMAND_TICK 50
 
 /* USER CODE END PD */
 
@@ -63,8 +65,7 @@ FingerState finger_state = (FingerState){.valid=0,
 										};
 
 uint8_t calibrate_status = 0;
-uint8_t vibration_state[5] = {0, 0, 0, 0, 0};
-uint8_t collision_end_status[5] = {0, 0, 0, 0, 0};
+uint32_t timer3_cnt;
 
 /* USER CODE END PV */
 
@@ -91,26 +92,19 @@ void HAL_Delay(uint32_t Delay){
 #endif
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
-
 	if(GPIO_PIN != GPIO_PIN_13) return;
-	//Map & calibrate potentiometers with servos on PC
-//	unsigned int num_fingers = 1; //Update as we add more
+	// Map & calibrate potentiometers with servos on PC
+	// unsigned int num_fingers = 1; //Update as we add more
 	HAL_Delay(10);
 	uint16_t pot_readings[NUM_FINGERS];
-	for(int i = 0; i<5; ++i){
-		pot_readings[i] = potRead(i % NUM_FINGERS); //Update per finger
+	for(int i = 0; i < 5; i ++){
+		pot_readings[i] = potRead(i % NUM_FINGERS); // Update per finger
 	}
-	//static
 	HAL_Delay(10);
-	for(int i = 0; i<NUM_FINGERS; ++i){
-		servoSetPos(i % NUM_FINGERS, calibrate_status ? 180 : 0); //Update per finger
-	}
 	sendCommand(calibrate_status ? CALIBRATEMAX : CALIBRATEZERO, pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 	calibrate_status = !calibrate_status;
-
 }
 
-uint32_t timer3_cnt;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim == &htim3){
 		// increment ms counter
@@ -156,15 +150,8 @@ int main(void)
   MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
 
-
-  // Data buffer
-  //  uint32_t buffer[10];
-  // Start timer
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
+  // Start timers(tim2 tim4) for servos
+  servoInit();
 
   // Timer for DMA ADC conversions
   HAL_TIM_Base_Start_IT(&htim3);
@@ -178,92 +165,57 @@ int main(void)
 
   // Variable initialization
   uint16_t pot_readings[5];
-  uint8_t ang_deg = 0;
   for (int i = 0; i < 5; i++) {
 	  servoSetPos(i, 180);
   }
-  uint16_t f1_ang;
-//  uint32_t timer3_cnt;
 
   // Checks if a collision has occurred on any of the fingers
   void checkCollisions(){
 	for(int i = 0; i < NUM_FINGERS; i++){
 		if(finger_state.collisions[i] == 1){
 			servoSetPosRaw(i, finger_state.angles[i]);
-	//			if((finger_state.angles[i] - pot_reading > 200)){
-	//				 clearFingerState();
-	//			}
-			if (vibration_state[i] == 0) {
-				vibration_state[i] = 20; // this value determines how long it will vibrates, vibrate_period = n * update_period
-				vibrationOn(i);
-			}
+			vibrationOnForDuration(i, 20);
 		}
 		else{
 			uint16_t p = potRead(i);
-			servoSetPosRaw(i, p);// + 30 / 180 * 4096);
-			vibrationOff(i);
-			vibration_state[i] = 0;
+			servoSetPosRaw(i, p);
+			resetVibration(i);
 		}
 	}
   }
 
-  void checkVibration(){
-	  for (int i = 0; i < NUM_FINGERS; i++){
-		  if (vibration_state[i] > 1){
-			  vibration_state[i]--;
-		  }
-		  else if (vibration_state[i] == 1) {
-			  vibrationOff(i);
-		  }
-	  }
-  }
-
 void update_command() {
-	// Send SOP, msb, lsb
+	// Send "SOP(wrapped in sendCommand), Command type, [msb, lsb] * 5"
 	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
 }
 
-  // Function to test servo and potentiometer
+  // Main update loop
   // Reads pot value, sends it via uart, moves servo accordingly
- void update(){
+void update(){
 	 for(int i = 0; i < NUM_FINGERS; i++){
 		 pot_readings[i] = potRead(i);
 	 }
 
 	checkCollisions();
 	checkVibration();
-
-	// reset servo if pot moves backwards while a collision is occuring
-	// TODO change for multiple fingers
-//	if((finger_state.collisions[1])){
-//
-//		 if((finger_state.angles[1] - pot_readings[1] > 200)){
-//			 clearFingerState();
-//		}
-//	}
-//	else{
-//		float deg_conv = 180.0 / 4096.0;
-//		 servoSetPos(0, pot_readings[1] * deg_conv + 50);
-//	}
-
-  }
+}
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  //vibrationOn(0);
+
   while (1)
   {
-	 // Runs every 25ms
-	 if(timer3_cnt % 10 == 0){
+	 // Run every update_tick ms
+	 if(timer3_cnt % UPDATE_TICK == 0){
 		 update();
 	 }
 
-	 if(timer3_cnt % 50 == 0){
+	 // Run every update_command_tick ms
+	 if(timer3_cnt % UPDATE_COMMAND_TICK == 0){
 		 update_command();
 	 }
-
 
     /* USER CODE END WHILE */
 

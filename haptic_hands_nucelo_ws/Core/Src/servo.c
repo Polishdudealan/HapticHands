@@ -9,9 +9,16 @@
 #include "servo.h"
 #include <stdint.h>
 
+extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim4;
 
 // Attaches servo to certain pin
-void servoInit(uint8_t finger, uint8_t pin){
+void servoInit(){
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_2);
 	return;
 }
 
@@ -39,6 +46,7 @@ void servoSetVal(uint8_t finger, uint16_t val) {
 
 // Sets position of the servo
 // Takes in degrees
+//
 void servoSetPos(uint8_t finger, uint8_t deg){
 	// Modification to flip servo direction
 //	deg = 180 - deg;
@@ -62,16 +70,4 @@ void servoSetPos(uint8_t finger, uint8_t deg){
 void servoSetPosRaw(uint8_t finger, uint16_t deg){
 	uint16_t val = 1000 + (double) 2 * 4000.0 * deg / 0x0FFF;
 	servoSetVal(finger, val);
-}
-
-// Sets a start/zero position of the servo
-// Does not move the servo
-void servoSetStart(uint8_t finger, uint8_t deg){
-	return;
-}
-
-
-// Moves servo to previously set start position
-void servoReset(uint8_t finger){
-	return;
 }

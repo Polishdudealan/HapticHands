@@ -18,5 +18,11 @@ uint16_t potRead(uint8_t finger){
 
 // Callback for when conversion finishes
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc1){
-	memcpy((void*)buf, (void*)adc_buffer, 10*sizeof(uint32_t));
+	/*
+	 *
+	 * TODO: check if this modification functions
+	 *
+	 */
+	// memcpy((void*)buf, (void*)adc_buffer, 10 * sizeof(uint32_t));
+	memcpy((void*)buf, (void*)adc_buffer, 5 * sizeof(uint16_t));
 }
