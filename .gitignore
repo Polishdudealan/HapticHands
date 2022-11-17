@@ -2,3 +2,4 @@
 *.o
 haptic_hands_*/Debug
 haptic_hands_*/*bug.launch
+Haptic_hands_pcb/History/*
