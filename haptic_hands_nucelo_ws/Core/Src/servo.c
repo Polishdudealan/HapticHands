@@ -69,5 +69,7 @@ void servoSetPos(uint8_t finger, uint8_t deg){
  */
 void servoSetPosRaw(uint8_t finger, uint16_t deg){
 	uint16_t val = 1000 + (double) 2 * 4000.0 * deg / 0x0FFF; //Maybe right shift by 12? reduce FP?
+	//uint16_t val = 1000 + (125*deg) >> 6; //TODO test
+	//uint16_t val = 1000 + 2 * deg
 	servoSetVal(finger, val);
 }
