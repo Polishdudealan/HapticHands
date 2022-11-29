@@ -9,7 +9,9 @@
 #ifndef INC_POTENTIOMETER_H_
 #define INC_POTENTIOMETER_H_
 
-extern uint16_t adc_buffer[5];
+typedef uint32_t ADC_BUF_TYPE; //change to uint16_t if needed and tested
+
+extern ADC_BUF_TYPE adc_buffer[NUM_FINGERS];
 
 // Reads 12-bit ADC value from
 // potentiometer into a 16 bit number

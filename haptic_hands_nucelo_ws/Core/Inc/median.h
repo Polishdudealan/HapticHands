@@ -6,6 +6,7 @@
  */
 
 #include <stdint.h>
+#include "main.h"
 
 #ifndef INC_MEDIAN_H_
 #define INC_MEDIAN_H_

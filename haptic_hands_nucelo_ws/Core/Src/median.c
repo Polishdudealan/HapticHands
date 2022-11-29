@@ -15,12 +15,17 @@ typedef struct
 	uint16_t hist_data[ARRAY_SIZE];
 } median;
 
-median median_array[5] = {
-	{0},
-	{0},
-	{0},
-	{0},
-	{0}
+median median_array[NUM_FINGERS] = {
+	{{0, 0},
+	{0, 0}},
+	{{0, 0},
+	{0, 0}},
+	{{0, 0},
+	{0, 0}},
+	{{0, 0},
+	{0, 0}},
+	{{0, 0},
+	{0, 0}}
 };
 
 void update_median_array(uint8_t finger, uint16_t val) {

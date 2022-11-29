@@ -6,7 +6,7 @@
  */
 #include "vibration.h"
 
-uint16_t vibration_pin[5] = {
+uint16_t vibration_pin[NUM_FINGERS] = {
 		GPIO_PIN_12,
 		GPIO_PIN_11,
 		GPIO_PIN_10,
@@ -14,7 +14,7 @@ uint16_t vibration_pin[5] = {
 		GPIO_PIN_8
 };
 
-uint8_t vibration_state[5] = {0, 0, 0, 0, 0};
+uint8_t vibration_state[NUM_FINGERS] = {0, 0, 0, 0, 0};
 
 void vibrationOnForDuration(uint8_t finger, uint8_t time) {
 	if (vibration_state[finger] == 0) {
@@ -39,7 +39,7 @@ void vibrationOff(uint8_t finger) {
 }
 
 void checkVibration(){
-	  for (int i = 0; i < 5; i++){
+	  for (int i = 0; i < NUM_FINGERS; i++){
 		  if (vibration_state[i] > 1){
 			  vibration_state[i]--;
 		  }

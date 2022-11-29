@@ -36,7 +36,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define NUM_FINGERS 5
 #define UPDATE_TICK 10
 #define UPDATE_COMMAND_TICK 50
 
@@ -67,6 +66,7 @@ FingerState finger_state = (FingerState){.valid=0,
 
 uint8_t calibrate_status = 0;
 uint32_t timer3_cnt;
+uint16_t pot_readings[NUM_FINGERS];
 
 /* USER CODE END PV */
 
@@ -80,7 +80,38 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
+// Checks if a collision has occurred on any of the fingers
+void checkCollisions(){
+	for(int i = 0; i < NUM_FINGERS; i++){
+		if(finger_state.collisions[i] == 1){
+			servoSetPosRaw(i, finger_state.angles[i]);
+			vibrationOnForDuration(i, 20);
+		}
+		else{
+			uint16_t p = potRead(i);
+			servoSetPosRaw(i, p);
+			resetVibration(i);
+		}
+	}
+  }
 
+void update_command() {
+	// Send "SOP(wrapped in sendCommand), Command type, [msb, lsb] * 5"
+	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+	uint16_t test = get_median(1);
+	sendCommand('1', get_median(0), get_median(1), get_median(2), get_median(3), get_median(4));
+}
+
+  // Main update loop
+  // Reads pot value, sends it via uart, moves servo accordingly
+void update(){
+	 for(int i = 0; i < NUM_FINGERS; i++){
+		 pot_readings[i] = potRead(i);
+		 update_median_array(i, pot_readings[i]);
+	 }
+	checkCollisions();
+	checkVibration();
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -95,10 +126,8 @@ void HAL_Delay(uint32_t Delay){
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_PIN){
 	if(GPIO_PIN != GPIO_PIN_13) return;
 	// Map & calibrate potentiometers with servos on PC
-	// unsigned int num_fingers = 1; //Update as we add more
 	HAL_Delay(10);
-	uint16_t pot_readings[NUM_FINGERS];
-	for(int i = 0; i < 5; i ++){
+	for(int i = 0; i < NUM_FINGERS; i ++){
 		pot_readings[i] = potRead(i % NUM_FINGERS); // Update per finger
 	}
 	HAL_Delay(10);
@@ -165,43 +194,9 @@ int main(void)
   UART_INIT();
 
   // Variable initialization
-  uint16_t pot_readings[5];
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < NUM_FINGERS; i++) {
 	  servoSetPos(i, 180);
   }
-
-  // Checks if a collision has occurred on any of the fingers
-  void checkCollisions(){
-	for(int i = 0; i < NUM_FINGERS; i++){
-		if(finger_state.collisions[i] == 1){
-			servoSetPosRaw(i, finger_state.angles[i]);
-			vibrationOnForDuration(i, 20);
-		}
-		else{
-			uint16_t p = potRead(i);
-			servoSetPosRaw(i, p);
-			resetVibration(i);
-		}
-	}
-  }
-
-void update_command() {
-	// Send "SOP(wrapped in sendCommand), Command type, [msb, lsb] * 5"
-	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
-	uint16_t test = get_median(1);
-	sendCommand('1', get_median(0), get_median(1), get_median(2), get_median(3), get_median(4));
-}
-
-  // Main update loop
-  // Reads pot value, sends it via uart, moves servo accordingly
-void update(){
-	 for(int i = 0; i < NUM_FINGERS; i++){
-		 pot_readings[i] = potRead(i);
-		 update_median_array(i, pot_readings[i]);
-	 }
-	checkCollisions();
-	checkVibration();
-}
 
   /* USER CODE END 2 */
 

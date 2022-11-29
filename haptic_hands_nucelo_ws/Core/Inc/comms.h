@@ -15,8 +15,8 @@
 // finger states
 typedef struct {
 	uint8_t valid;
-	uint16_t angles[5];
-	uint8_t collisions[5];
+	uint16_t angles[NUM_FINGERS];
+	uint8_t collisions[NUM_FINGERS];
 } FingerState;
 
 extern FingerState finger_state;

@@ -98,7 +98,7 @@ void Error_Handler(void);
 #define servo4_Pin GPIO_PIN_7
 #define servo4_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+#define NUM_FINGERS 5
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

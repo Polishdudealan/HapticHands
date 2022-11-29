@@ -9,8 +9,8 @@
 
 // Should contain only up to 5 values. One for each ADC channel.
 // TODO double check all channels are being initialized properly
-uint16_t buf[5];
-uint16_t adc_buffer[5];
+uint16_t buf[NUM_FINGERS];
+ADC_BUF_TYPE adc_buffer[NUM_FINGERS];
 
 uint16_t potRead(uint8_t finger){
 	return buf[finger];
@@ -18,11 +18,6 @@ uint16_t potRead(uint8_t finger){
 
 // Callback for when conversion finishes
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc1){
-	/*
-	 *
-	 * TODO: check if this modification functions
-	 *
-	 */
-	// memcpy((void*)buf, (void*)adc_buffer, 10 * sizeof(uint32_t));
-	memcpy((void*)buf, (void*)adc_buffer, 5 * sizeof(uint16_t));
+	// TODO: check if this modification to uint16_t functions
+	memcpy((void*)buf, (void*)adc_buffer, sizeof(adc_buffer));
 }
