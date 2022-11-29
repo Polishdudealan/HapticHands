@@ -25,9 +25,9 @@ It is unknown if angle 180 would bend a user's fingers too far. It might be bett
 1. Visit [Unity online asset store](https://assetstore.unity.com/packages/tools/integration/oculus-integration-82022) and add Oculus Integration to your resources. Remember to use the same account to login the Unity and the Unity asset store.
 2. Create an empty Unity 3D project
 3. In menu bar, go to windows -> package manager. In a drop down menu, find my assets. Then select Oculus Integration, download and import it.
-4. In local file explorer, find the Unity package for the project then double click it.
-5. Import all files in the package. (If there is an error showing up, re-import the Oculus Integration)
-6. In menu bar, go to project -> preference -> player and find .Net settings. Set it to .Net4.0 or some other versions you have, otherwise there might be some issues with serial port access.
-7. You can adjust the values and properties in the side panels. You can find scripts in the file explorer on the bottom.
+4. Keep the project opening, in local file explorer, find the Unity package for the hand project then double click it.
+5. Import all files in the package. (You don't need to select Oculus folder if there is any in the package)(If there is an error showing up, re-import the Oculus Integration)
+6. If there are some warning complaining about SerialPort, in menu bar, go to edit -> project settings -> player -> other settings, find .Net settings. Set it to .Net4.0 or some other versions you have, just not set it to .Net2.0.
+7. You can adjust the values and properties in the side panels. For gameobject CommManager, you can adjust comport and calibration. You can find scripts in the file explorer on the bottom.
 
 
