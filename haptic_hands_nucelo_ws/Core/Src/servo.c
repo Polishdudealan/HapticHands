@@ -24,10 +24,10 @@ void servoInit(){
 
 void servoSetVal(uint8_t finger, uint16_t val) {
 	switch(finger){
-		case 0:
+		case 1:
 			TIM2->CCR1 = val;
 			break;
-		case 1:
+		case 0:
 			TIM2->CCR2 = val;
 			break;
 		case 2:
