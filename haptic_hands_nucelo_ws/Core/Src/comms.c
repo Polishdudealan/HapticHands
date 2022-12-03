@@ -11,6 +11,8 @@ extern UART_HandleTypeDef huart6;
 
 // UART buffer. Data will be received via interrupts
 uint8_t received_data[UART_BUFFER_SIZE] = {0};
+uint8_t uart_buffer;
+uint8_t pos = 0;
 uint8_t rx_buffer[UART_BUFFER_SIZE];
 
 // uint8 to uint16 helper function
@@ -26,12 +28,13 @@ void updateFingerState(){
 	uint8_t tag = received_data[1];
 
 	 if(SOP == '$'){
+
 		 switch(tag){
 			 case POTENTIOMETER:
 				 finger_state.valid = 1;
 				 for(int i = 0; i < 5; i++){
 					 finger_state.angles[i] = uint8_to_uint16(received_data[3 * i + 2], received_data[3 * i + 3]);
-					 finger_state.collisions[i] = received_data[3 * i + 4];
+					 finger_state.collisions[i] = received_data[3 * i + 4] == 1 ? 1 : 0;
 //					 finger_state.angles[i] = potRead(i);
 				 }
 				 break;
@@ -44,15 +47,35 @@ void updateFingerState(){
 	 }
 }
 
+void checkFingerState(){
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, received_data[7] == 1 ? GPIO_PIN_SET : GPIO_PIN_RESET);
+	if (uart_buffer == '$') {
+		//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, SET);
+		received_data[pos] = uart_buffer;
+		pos = 1;
+		return;
+	}
+	if (pos > 0 && pos < UART_BUFFER_SIZE) {
+		received_data[pos] = uart_buffer;
+		pos ++;
+	}
+	if (pos >= UART_BUFFER_SIZE) {
+		updateFingerState();
+		pos = 0;
+	}
+	return;
+}
+
 // UART callback. Moves data from uart buffer into received_data buffer
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-	updateFingerState();
-	HAL_UART_Receive_DMA(&huart6, received_data, UART_BUFFER_SIZE);
+	//updateFingerState();
+	HAL_UART_Receive_DMA(&huart6, &uart_buffer, 1);
+	checkFingerState();
 }
 
 // Start listening for uart data
 void UART_INIT(){
-	HAL_UART_Receive_DMA (&huart6, received_data, UART_BUFFER_SIZE);
+	HAL_UART_Receive_DMA (&huart6, &uart_buffer, 1);
 }
 
 // Sets command in format
