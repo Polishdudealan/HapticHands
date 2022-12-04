@@ -82,6 +82,7 @@ static void MX_TIM4_Init(void);
 /* USER CODE BEGIN PFP */
 // Checks if a collision has occurred on any of the fingers
 void checkCollisions(){
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, finger_state.collisions[1]);
 	for(int i = 0; i < NUM_FINGERS; i++){
 		if(finger_state.collisions[i] == 1){
 			servoSetPosRaw(i, finger_state.angles[i]);
@@ -97,8 +98,8 @@ void checkCollisions(){
 
 void update_command() {
 	// Send "SOP(wrapped in sendCommand), Command type, [msb, lsb] * 5"
-	sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
-	uint16_t test = get_median(1);
+	// sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
+	//uint16_t test = get_median(1);
 	sendCommand('1', get_median(0), get_median(1), get_median(2), get_median(3), get_median(4));
 }
 
@@ -199,8 +200,8 @@ int main(void)
   }
 
   // Turn on debug LEDs
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, SET);
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, SET);
+  //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_1, SET);
+  //HAL_GPIO_WritePin(GPIOC, GPIO_PIN_2, SET);
 
   /* USER CODE END 2 */
 
