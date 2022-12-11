@@ -23,7 +23,7 @@ median median_array[5] = {
 	{0}
 };
 
-void update_median_array(uint8_t finger, uint16_t val) {
+void updateMedianArray(uint8_t finger, uint16_t val) {
 //	for (int i = 0; i < (sizeof(median_array) / sizeof(uint16_t)) - 1; i ++) {
 	uint16_t head = median_array[finger].hist_data[0];
 	for (int i = 0; i < ARRAY_SIZE - 1; i ++) {
@@ -73,7 +73,7 @@ void update_median_array(uint8_t finger, uint16_t val) {
 	median_array[finger].data[ARRAY_SIZE - 1] = val;
   }
 
-uint16_t get_median(uint8_t finger) {
+uint16_t getMedian(uint8_t finger) {
 	/* be careful when initializing, the array doesn't have the array filled. */
 //	return median_array[(int)(sizeof(median_array) / sizeof(uint16_t)) / 2];
 	return median_array[finger].data[(int)(ARRAY_SIZE / 2)];

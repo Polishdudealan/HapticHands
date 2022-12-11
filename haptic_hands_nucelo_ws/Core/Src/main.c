@@ -99,8 +99,8 @@ void checkCollisions(){
 void update_command() {
 	// Send "SOP(wrapped in sendCommand), Command type, [msb, lsb] * 5"
 	// sendCommand('1', pot_readings[0], pot_readings[1], pot_readings[2], pot_readings[3], pot_readings[4]);
-	//uint16_t test = get_median(1);
-	sendCommand('1', get_median(0), get_median(1), get_median(2), get_median(3), get_median(4));
+	//uint16_t test = getMedian(1);
+	sendCommand('1', getMedian(0), getMedian(1), getMedian(2), getMedian(3), getMedian(4));
 }
 
   // Main update loop
@@ -108,7 +108,7 @@ void update_command() {
 void update(){
 	 for(int i = 0; i < NUM_FINGERS; i++){
 		 pot_readings[i] = potRead(i);
-		 update_median_array(i, pot_readings[i]);
+		 updateMedianArray(i, pot_readings[i]);
 	 }
 	checkCollisions();
 	checkVibration();
