@@ -1,0 +1,5 @@
+../Core/Src/vibration.c:32:6:vibrationOn	0	static
+../Core/Src/vibration.c:19:6:vibrationOnForDuration	4	static
+../Core/Src/vibration.c:37:6:vibrationOff	0	static
+../Core/Src/vibration.c:26:6:resetVibration	8	static
+../Core/Src/vibration.c:41:6:checkVibration	16	static
